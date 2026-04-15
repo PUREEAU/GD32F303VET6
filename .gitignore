@@ -8,14 +8,15 @@
 /Project/Listings/
 /Project/output/
 
-/Project/JLinkLog.txt
-/Project/JLinkSettings.ini
-/Project/project.uvoptx
-/Project/EventRecorderStub.scvd
-/Project/project.code-workspace
-/Project/RTE_Components.h
-/Project/project.uvguix*
 
+
+# /Project/EventRecorderStub.scvd
+# /Project/project.uvguix*
+# /Project/JLinkLog.txt
+# /Project/JLinkSettings.ini
+# /Project/project.uvoptx
+# /Project/RTE_Components.h
+# /Project/project.code-workspace
 
 *.o
 *.obj

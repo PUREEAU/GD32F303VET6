@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "name": "GD32F303VET6",
+            "path": ".."
+        }
+    ],
+    "settings": {},
+    "extensions": {}
+}
