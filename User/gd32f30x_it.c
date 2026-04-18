@@ -37,6 +37,9 @@ OF SUCH DAMAGE.
 #include "systick.h"
 #include "lvgl.h"
 #include "lv_port_disp_template.h"
+#include "FreeRtosTask.h"
+
+extern void xPortSysTickHandler( void );
 /*!
     \brief      this function handles NMI exception
     \param[in]  none
@@ -105,9 +108,9 @@ void UsageFault_Handler(void)
     \param[out] none
     \retval     none
 */
-void SVC_Handler(void)
-{
-}
+//void SVC_Handler(void)
+//{
+//}
 
 /*!
     \brief      this function handles DebugMon exception
@@ -125,18 +128,19 @@ void DebugMon_Handler(void)
     \param[out] none
     \retval     none
 */
-void PendSV_Handler(void)
-{
-}
+//void PendSV_Handler(void)
+//{
+//}
 
-/*!
-    \brief      this function handles SysTick exception
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
 void SysTick_Handler(void)
 {
     delay_decrement();
-    lv_tick_inc(1);
+		#if (INCLUDE_xTaskGetSchedulerState  == 1 )
+			if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
+			{
+		#endif   
+				xPortSysTickHandler();
+		#if (INCLUDE_xTaskGetSchedulerState  == 1 )
+			}
+		#endif  
 }
