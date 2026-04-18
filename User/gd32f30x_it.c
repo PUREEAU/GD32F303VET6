@@ -135,12 +135,14 @@ void DebugMon_Handler(void)
 void SysTick_Handler(void)
 {
     delay_decrement();
-		#if (INCLUDE_xTaskGetSchedulerState  == 1 )
-			if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
-			{
-		#endif   
-				xPortSysTickHandler();
-		#if (INCLUDE_xTaskGetSchedulerState  == 1 )
-			}
-		#endif  
+    lv_tick_inc(1);
+    #if (INCLUDE_xTaskGetSchedulerState  == 1 )
+        if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
+        {
+    #endif   
+            xPortSysTickHandler();
+    #if (INCLUDE_xTaskGetSchedulerState  == 1 )
+        }
+    #endif
+    
 }

@@ -5,29 +5,13 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-/******************************************************************************/
-/* 硬件描述相关定义 ***********************************************************/
-/******************************************************************************/
-
-/* 大多数情况下，configCPU_CLOCK_HZ 必须设置为用于生成内核周期性 tick 中断的外设时钟频率。
- * 默认值设为 20MHz，与 QEMU 演示设置匹配。您的应用程序肯定需要不同的值，请正确设置。
- * 这通常（但不总是）等于主系统时钟频率。 */
 #if defined(__ICCARM__)||defined(__CC_ARM)||defined(__GNUC__)
 	#include <stdint.h>
 	extern uint32_t SystemCoreClock;
 #endif
 #define configCPU_CLOCK_HZ    (SystemCoreClock)
-/* configSYSTICK_CLOCK_HZ 是 ARM Cortex-M 端口可选参数。
- *
- * 默认情况下，ARM Cortex-M 端口使用 Cortex-M SysTick 定时器生成 RTOS tick 中断。
- * 大多数 Cortex-M MCU 以与 MCU 本身相同的频率运行 SysTick 定时器 —— 这种情况下不需要定义
- * configSYSTICK_CLOCK_HZ，应保持注释状态。如果 SysTick 定时器时钟频率与 MCU 内核不同，
- * 则照常将 configCPU_CLOCK_HZ 设为 MCU 时钟频率，并将 configSYSTICK_CLOCK_HZ 设为 SysTick 时钟频率。
- * 如果未定义，则不使用。默认未定义（注释掉）。如果需要此值，请取消注释并设置为合适的值。 */
 
-/*
- #define configSYSTICK_CLOCK_HZ                  [平台特定]
- */
+#define configTOTAL_HEAP_SIZE       ( ( size_t ) ( 14 * 1024 ) )
 
 /******************************************************************************/
 /* 调度行为相关定义 ***********************************************************/
@@ -57,7 +41,7 @@
 
 /* configMAX_PRIORITIES 设置可用任务优先级的数量。任务可被分配 0 到 (configMAX_PRIORITIES-1) 的优先级。
  * 0 是最低优先级。 */
-#define configMAX_PRIORITIES                       5
+#define configMAX_PRIORITIES                       10
 
 /* configMINIMAL_STACK_SIZE 定义空闲任务使用的栈大小（以字为单位，而非字节！）。
  * 内核不会将此常量用于任何其他目的。示例应用程序使用此常量使示例在多种硬件架构间具有一定的可移植性。 */
@@ -186,10 +170,6 @@
  * 参见 https://www.freertos.org/Static_Vs_Dynamic_Memory_Allocation.html */
 #define configSUPPORT_DYNAMIC_ALLOCATION             1
 
-/* 当构建中包含 heap_1.c、heap_2.c 或 heap_4.c 时，configTOTAL_HEAP_SIZE 设置 FreeRTOS 堆的总大小（以字节为单位）。
- * 该值默认为 4096 字节，但必须针对每个应用程序进行调整。注意堆将出现在 .bss 段中。
- * 参见 https://www.freertos.org/a00111.html */
-#define configTOTAL_HEAP_SIZE       ( ( size_t ) ( 20 * 1024 ) )
 
 /* 设置 configAPPLICATION_ALLOCATED_HEAP 为 1，让应用程序分配用作 FreeRTOS 堆的数组。
  * 设为 0 则让链接器分配用作 FreeRTOS 堆的数组。如果未定义，默认为 0。 */
@@ -221,7 +201,7 @@
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY     5
 
 /* configMAX_API_CALL_INTERRUPT_PRIORITY 是 configMAX_SYSCALL_INTERRUPT_PRIORITY 的另一个名称 —— 使用的名称取决于 FreeRTOS 端口。 */
-#define configMAX_API_CALL_INTERRUPT_PRIORITY    5
+#define configMAX_API_CALL_INTERRUPT_PRIORITY    configMAX_SYSCALL_INTERRUPT_PRIORITY
 
 /******************************************************************************/
 /* 钩子和回调函数相关定义 *****************************************************/

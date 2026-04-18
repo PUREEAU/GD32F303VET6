@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>Target 1</TargetName>
+      <TargetName>Controller_project</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
@@ -458,36 +458,6 @@
               <FileName>FreeRtosTask.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\FreeRtosTask.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Handware</GroupName>
-          <Files>
-            <File>
-              <FileName>ili9488.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Handware\LCD\ili9488.c</FilePath>
-            </File>
-            <File>
-              <FileName>picture.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Handware\LCD\picture.c</FilePath>
-            </File>
-            <File>
-              <FileName>exmc_lcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Handware\LCD\exmc_lcd.c</FilePath>
-            </File>
-            <File>
-              <FileName>Key.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Handware\KEY\Key.c</FilePath>
-            </File>
-            <File>
-              <FileName>ADC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Handware\ADC\ADC.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1453,6 +1423,56 @@
               <FileName>heap_4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\FreeRTOS\portable\MemMang\heap_4.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Handware</GroupName>
+          <Files>
+            <File>
+              <FileName>bsp_system.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Handware\bsp_system.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Handware/LCD</GroupName>
+          <Files>
+            <File>
+              <FileName>ili9488.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\LCD\ili9488.c</FilePath>
+            </File>
+            <File>
+              <FileName>picture.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\LCD\picture.c</FilePath>
+            </File>
+            <File>
+              <FileName>exmc_lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\LCD\exmc_lcd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Handware/KEY</GroupName>
+          <Files>
+            <File>
+              <FileName>Key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\KEY\Key.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Handware/ADC</GroupName>
+          <Files>
+            <File>
+              <FileName>ADC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\ADC\ADC.c</FilePath>
             </File>
           </Files>
         </Group>
