@@ -57,9 +57,11 @@ static void prvLEDTask(void *pvParameters)
 {
     rcu_periph_clock_enable(RCU_GPIOC);
     gpio_init(GPIOA,GPIO_MODE_OUT_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_8);
+    
     while (1) {
         gpio_bit_write(GPIOA, GPIO_PIN_8, (bit_status)(1 - gpio_input_bit_get(GPIOA, GPIO_PIN_8)));
-        vTaskDelay(pdMS_TO_TICKS(500)); // 延迟 500ms
+        // printf("Led Work\r\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // 延迟 500ms
     }
 
 }
@@ -71,10 +73,26 @@ static void prvLcdDebugTask(void *pvParameters)
     lv_label_set_text(label, "0");
     uint16_t count = 0;
     char buf[20];
+    lv_mem_monitor_t mon;
+    lv_mem_monitor(&mon);
     while (1) {
         sprintf(buf, "%d", count++);
         lv_label_set_text(label, buf);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        uint32_t used_bytes = mon.total_size - mon.free_size;  // 当前已使用字节数
+        printf("Total: %u bytes, Used: %u bytes (%.1f%%), Free: %u bytes, Max used: %u bytes, Frag: %u%%\r\n",
+            (unsigned int)mon.total_size,
+            (unsigned int)used_bytes,
+            (float)(used_bytes * 100.0f / mon.total_size),
+            (unsigned int)mon.free_size,
+            (unsigned int)mon.max_used,
+            (unsigned int)mon.frag_pct);
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 
+int fputc(int ch, FILE *p){
+    usart_data_transmit(USART0,(uint8_t)ch);
+    while (RESET == usart_flag_get(USART0,USART_FLAG_TBE));
+    
+    return ch;
+}

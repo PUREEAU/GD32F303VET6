@@ -190,7 +190,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -415,19 +415,24 @@
               <FilePath>..\Libraries\GD32F30x_standard_peripheral\Source\gd32f30x_adc.c</FilePath>
             </File>
             <File>
+              <FileName>gd32f30x_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\GD32F30x_standard_peripheral\Source\gd32f30x_usart.c</FilePath>
+            </File>
+            <File>
               <FileName>gd32f30x_dma.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\GD32F30x_standard_peripheral\Source\gd32f30x_dma.c</FilePath>
             </File>
             <File>
-              <FileName>gd32f30x_misc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\GD32F30x_standard_peripheral\Source\gd32f30x_misc.c</FilePath>
-            </File>
-            <File>
               <FileName>gd32f30x_exmc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\GD32F30x_standard_peripheral\Source\gd32f30x_exmc.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32f30x_misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\GD32F30x_standard_peripheral\Source\gd32f30x_misc.c</FilePath>
             </File>
             <File>
               <FileName>gd32f30x_timer.c</FileName>
