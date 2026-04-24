@@ -27,7 +27,7 @@
 /* 设置 configUSE_TIME_SLICING 为 1，使调度器在每个 tick 中断时在相同优先级的就绪态任务之间切换。
  * 设为 0 可防止调度器仅因为 tick 中断就在就绪态任务之间切换。
  * 参见 https://freertos.org/single-core-amp-smp-rtos-scheduling.html */
-#define configUSE_TIME_SLICING                     0
+#define configUSE_TIME_SLICING                     1
 
 /* 设置 configUSE_PORT_OPTIMISED_TASK_SELECTION 为 1，使用针对目标硬件指令集优化的算法选择下一个运行的任务
  * （通常使用前导零计数汇编指令）。设为 0 则使用适用于所有 FreeRTOS 端口的通用 C 算法。
@@ -227,7 +227,7 @@
  * 如果为 2，则检查写入任务栈末尾的模式是否被覆盖。这较慢，但能捕获大多数（但不是全部）栈溢出。
  * 当 configCHECK_FOR_STACK_OVERFLOW 设为 1 时，应用程序编写者必须提供栈溢出回调。
  * 参见 https://www.freertos.org/Stacks-and-stack-overflow-checking.html 如果未定义，默认为 0。 */
-#define configCHECK_FOR_STACK_OVERFLOW        0
+#define configCHECK_FOR_STACK_OVERFLOW        2
 
 /******************************************************************************/
 /* 运行时和任务统计信息收集相关定义 *******************************************/
@@ -444,7 +444,7 @@
 #define INCLUDE_vTaskDelay                     1
 #define INCLUDE_xTaskGetSchedulerState         1
 #define INCLUDE_xTaskGetCurrentTaskHandle      1
-#define INCLUDE_uxTaskGetStackHighWaterMark    0
+#define INCLUDE_uxTaskGetStackHighWaterMark    1
 #define INCLUDE_xTaskGetIdleTaskHandle         0
 #define INCLUDE_eTaskGetState                  0
 #define INCLUDE_xEventGroupSetBitFromISR       1
