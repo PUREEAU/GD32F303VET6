@@ -21,8 +21,9 @@
 void ADC_Init(void);
 void ADC_Scan(void);
 
-extern uint16_t adc_chg_vtg;
-extern uint16_t adc_bat_vtg;
-extern uint16_t adc_tmp_vtg;
+extern uint16_t adc_charge_raw;
+extern uint16_t adc_battery_raw;
+extern uint16_t adc_temp_raw;
 extern uint16_t ntc_adc_table[];
+
 #endif

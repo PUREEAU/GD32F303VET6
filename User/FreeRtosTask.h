@@ -14,6 +14,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "Adc.h"
 
 void vTaskSchedule(void);
 

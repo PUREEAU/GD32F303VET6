@@ -1,0 +1,110 @@
+	LCD_RST_SET;
+	delay_ms(1);
+	LCD_RST_CLR;
+	delay_ms(10);
+	LCD_RST_SET;
+	delay_ms(120);  
+
+
+//************* Start Initial Sequence **********//
+LCD_WR_REG(0XF7);    	
+LCD_WR_DATA(0xA9); 	
+LCD_WR_DATA(0x51); 	
+LCD_WR_DATA(0x2C); 	
+LCD_WR_DATA(0x82);
+
+LCD_WR_REG(0XEC);    	
+LCD_WR_DATA(0x00); 	
+LCD_WR_DATA(0x02); 	
+LCD_WR_DATA(0x03); 	
+LCD_WR_DATA(0x7A);
+
+LCD_WR_REG(0xC0); 	
+LCD_WR_DATA(0x13); 	
+LCD_WR_DATA(0x13); 	
+ 	
+LCD_WR_REG(0xC1); 	
+LCD_WR_DATA(0x41); 	
+	
+LCD_WR_REG(0xC5); 	
+LCD_WR_DATA(0x00); 	
+LCD_WR_DATA(0x28); 	
+LCD_WR_DATA(0x80);
+	
+LCD_WR_REG(0xB1);   //Frame rate 70HZ  	
+LCD_WR_DATA(0xB0);
+LCD_WR_DATA(0x11);	
+	
+LCD_WR_REG(0xB4); 	
+LCD_WR_DATA(0x02);   	
+	
+LCD_WR_REG(0xB6); //RGB/MCU Interface Control	
+LCD_WR_DATA(0x02);   //MCU	
+LCD_WR_DATA(0x22); 
+
+LCD_WR_REG(0xB7); 	
+LCD_WR_DATA(0xc6); 
+
+LCD_WR_REG(0xBE); 	
+LCD_WR_DATA(0x00); 
+LCD_WR_DATA(0x04);	
+	
+LCD_WR_REG(0xE9); 	
+LCD_WR_DATA(0x00);
+
+LCD_WR_REG(0xF4); 	
+LCD_WR_DATA(0x00); 
+LCD_WR_DATA(0x00);
+LCD_WR_DATA(0x0f);	
+	
+LCD_WR_REG(0xE0); 	
+LCD_WR_DATA(0x00); 	
+LCD_WR_DATA(0x04); 	
+LCD_WR_DATA(0x0E); 	
+LCD_WR_DATA(0x08); 	
+LCD_WR_DATA(0x17); 	
+LCD_WR_DATA(0x0A); 	
+LCD_WR_DATA(0x40); 	
+LCD_WR_DATA(0x79); 	
+LCD_WR_DATA(0x4D); 	
+LCD_WR_DATA(0x07); 	
+LCD_WR_DATA(0x0E); 	
+LCD_WR_DATA(0x0A); 	
+LCD_WR_DATA(0x1A); 	
+LCD_WR_DATA(0x1D); 	
+LCD_WR_DATA(0x0F);  	
+ 	
+LCD_WR_REG(0xE1); 	
+LCD_WR_DATA(0x00); 	
+LCD_WR_DATA(0x1B); 	
+LCD_WR_DATA(0x1F); 	
+LCD_WR_DATA(0x02); 	
+LCD_WR_DATA(0x10); 	
+LCD_WR_DATA(0x05); 	
+LCD_WR_DATA(0x32); 	
+LCD_WR_DATA(0x34); 	
+LCD_WR_DATA(0x43); 	
+LCD_WR_DATA(0x02); 	
+LCD_WR_DATA(0x0A); 	
+LCD_WR_DATA(0x09); 	
+LCD_WR_DATA(0x33); 	
+LCD_WR_DATA(0x37); 	
+LCD_WR_DATA(0x0F); 
+
+
+LCD_WR_REG(0xF4);      
+LCD_WR_DATA(0x00);
+LCD_WR_DATA(0x00);
+LCD_WR_DATA(0x0f);	
+	
+LCD_WR_REG(0x36); 	
+LCD_WR_DATA(0x08); 	
+	
+LCD_WR_REG(0x3A);  //Interface Mode Control	
+LCD_WR_DATA(0x55);  //0x66 18bit; 0x55 16bit			
+	
+LCD_WR_REG(0x20); 	
+LCD_WR_REG(0x11); 	
+delay_ms(120); 	
+LCD_WR_REG(0x29); 	
+delay_ms(50); 

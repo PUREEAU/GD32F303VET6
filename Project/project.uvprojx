@@ -340,7 +340,7 @@
               <MiscControls>--diag_suppress=1,1362,188,546,111,68</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS;..\Libraries\CMSIS\GD\GD32F30x\Include;..\Libraries\GD32F30x_standard_peripheral\Include;..\User;..\Handware;..\Handware\LCD;..\Handware\KEY;..\LVGL\GUI;..\LVGL\GUI\lvgl;..\LVGL\GUI\lvgl\src;..\LVGL\GUI\lvgl\examples\porting;..\LVGL\GUI_APP\demos;..\LVGL\GUI_APP\demos\stress;..\FreeRTOS;..\FreeRTOS\include;..\FreeRTOS\portable\MemMang;..\FreeRTOS\portable\RVDS\ARM_CM4F</IncludePath>
+              <IncludePath>..\Libraries\CMSIS;..\Libraries\CMSIS\GD\GD32F30x\Include;..\Libraries\GD32F30x_standard_peripheral\Include;..\User;..\LVGL\GUI;..\LVGL\GUI\lvgl;..\LVGL\GUI\lvgl\src;..\LVGL\GUI\lvgl\examples\porting;..\LVGL\GUI_APP\demos;..\LVGL\GUI_APP\demos\stress;..\FreeRTOS;..\FreeRTOS\include;..\FreeRTOS\portable\MemMang;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\Handware;..\Handware\ADC;..\Handware\KEY;..\Handware\LCD</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1475,9 +1475,9 @@
           <GroupName>Handware/ADC</GroupName>
           <Files>
             <File>
-              <FileName>ADC.c</FileName>
+              <FileName>Adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Handware\ADC\ADC.c</FilePath>
+              <FilePath>..\Handware\ADC\Adc.c</FilePath>
             </File>
           </Files>
         </Group>
