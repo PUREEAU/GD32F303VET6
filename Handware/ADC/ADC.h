@@ -16,14 +16,27 @@
 #define ADC_TMP_CHANNEL ADC_CHANNEL_6
 
 #define ADC_CHANNEL_MAX 1
-
+#define NTC_ADC_SIZE 191
 
 void ADC_Init(void);
 void ADC_Scan(void);
+void ADC_Config(void);
 
 extern uint16_t adc_charge_raw;
 extern uint16_t adc_battery_raw;
-extern uint16_t adc_temp_raw;
+extern uint16_t adc_temperture_raw;
 extern uint16_t ntc_adc_table[];
+
+#define VOLTAGE_WINDOW_SIZE  16
+extern uint32_t voltage_buffer[VOLTAGE_WINDOW_SIZE];
+extern uint8_t  voltage_buffer_index ;
+extern uint32_t voltage_sum ;
+
+#define TEMPERTURE_WINDOW_SIZE  4
+extern uint32_t temperture_buffer[TEMPERTURE_WINDOW_SIZE];
+extern uint8_t  temperture_buffer_index ;
+extern uint32_t temperture_sum ;
+
+void adc_filter_prefill(void);
 
 #endif

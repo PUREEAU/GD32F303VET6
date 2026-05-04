@@ -24,7 +24,7 @@
 
 /* ADC 数据管理任务 */
 #define ADC_DATA_MANAGE_TASK_PRIO       5
-#define ADC_DATA_MANAGE_TASK_STACK_SIZE 256
+#define ADC_DATA_MANAGE_TASK_STACK_SIZE 512
 
 /*============================================================================
  * 任务句柄声明区（静态全局变量）
@@ -123,6 +123,105 @@ static void prvLEDTask(void *pvParameters)
     }
 }
 
+
+float m_SOC = 0;
+uint32_t charge_voltage_mv = 0;
+uint32_t battery_voltage_mv = 0;
+uint32_t Temperture_voltage = 0;
+
+typedef enum {
+    CHG_STATUS_IDLE = 0,      // 未充电
+    CHG_STATUS_OVP = 1,       // 过压
+    CHG_STATUS_NORMAL = 2,    // 充电中
+    CHG_STATUS_LOW = 3        // 电压低
+} chg_status_t;
+
+typedef enum {
+    BAT_STATUS_IDLE = 0,      // 电压极低
+    BAT_STATUS_OVP = 1,       // 过压
+    BAT_STATUS_NORMAL = 2,    // 电压正常
+    BAT_STATUS_LOW = 3        // 电压低
+} bat_status_t;
+
+chg_status_t charge_status;
+bat_status_t battery_status;
+
+// ====================== 修改任务函数，使用外部静态变量 ======================
+static void prvAdcDataManageTask(void *pvParameters)
+{
+    ADC_Scan();
+    vTaskDelay(pdMS_TO_TICKS(500));
+    while (1) {
+        
+        taskENTER_CRITICAL();
+        ADC_Scan();
+        
+        // 充电电压处理（不变）
+        charge_voltage_mv = adc_charge_raw * 1000 * (3.3f / 4095) * (10 + 91) / 10;
+        if (charge_voltage_mv >= 5500) {
+            charge_status = CHG_STATUS_OVP;
+        } else if (charge_voltage_mv >= 4450) {
+            charge_status = CHG_STATUS_NORMAL;
+        } else if (charge_voltage_mv >= 500) {
+            charge_status = CHG_STATUS_LOW;
+        } else {
+            charge_status = CHG_STATUS_IDLE;
+        }
+
+        // 获取原始电池电压
+        uint32_t raw_voltage_mv = adc_battery_raw * 1000 * (3.3f / 4095) * (10 + 91) / 10;
+        // 滑动平均滤波（使用全局静态变量）
+        voltage_sum = voltage_sum - voltage_buffer[voltage_buffer_index] + raw_voltage_mv;
+        voltage_buffer[voltage_buffer_index] = raw_voltage_mv;
+        voltage_buffer_index = (voltage_buffer_index + 1) % VOLTAGE_WINDOW_SIZE;
+        battery_voltage_mv = voltage_sum / VOLTAGE_WINDOW_SIZE;
+        // 电池状态判断
+        if (battery_voltage_mv > 4200) {
+            battery_status = BAT_STATUS_OVP;
+        } else if (battery_voltage_mv >= 3700) {
+            battery_status = BAT_STATUS_NORMAL;
+        } else if (battery_voltage_mv >= 3500) {
+            battery_status = BAT_STATUS_LOW;
+        } else {
+            battery_status = BAT_STATUS_IDLE;
+        }
+        m_SOC = battery_voltage_mv / 1000.0f / 4.0f * 100.0f;
+
+
+        temperture_sum = temperture_sum - temperture_buffer[temperture_buffer_index] + adc_temperture_raw;
+        temperture_buffer[temperture_buffer_index] = adc_temperture_raw;
+        temperture_buffer_index = (temperture_buffer_index + 1) % TEMPERTURE_WINDOW_SIZE;
+        uint32_t temperture_avg = temperture_sum / TEMPERTURE_WINDOW_SIZE;
+        uint8_t idx = 0;
+        if (temperture_avg <= ntc_adc_table[0]) {
+            idx = 0;
+        } else if (temperture_avg >= ntc_adc_table[NTC_ADC_SIZE - 1]) {
+            idx = NTC_ADC_SIZE - 1;
+        } else {
+            uint8_t lo = 0, hi = NTC_ADC_SIZE - 1;
+            while (lo <= hi) {
+                uint8_t mid = (lo + hi) / 2;
+                if (temperture_avg == ntc_adc_table[mid]) {
+                    idx = mid;
+                    break;
+                } else if (temperture_avg < ntc_adc_table[mid]) {
+                    hi = mid - 1;
+                } else {
+                    lo = mid + 1;
+                }
+            }
+            if (temperture_avg != ntc_adc_table[idx]) {
+                idx = hi;   
+            }
+        }
+        Temperture_voltage = idx - 44;
+
+        taskEXIT_CRITICAL();
+        
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
 /**
  * @brief       系统调试任务，打印栈和堆信息，更新 LVGL 标签
  * @param       pvParameters 未使用
@@ -131,18 +230,22 @@ static void prvLEDTask(void *pvParameters)
  */
 static void prvLcdDebugTask(void *pvParameters)
 {
-    /* 创建标签一次 */
-    lv_obj_t *label = lv_label_create(lv_scr_act());
-    lv_obj_center(label);
-    lv_label_set_text(label, "0");
-    uint16_t count = 0;
-    char buf[20];
+  
     lv_mem_monitor_t mon;
     lv_mem_monitor(&mon);
 
     UBaseType_t rem;
 
-    HeapStats_t xHeapStats;
+    char buf[20];
+    lv_obj_t *label = lv_label_create(lv_scr_act());
+    lv_obj_center(label);
+    lv_label_set_text(label, "0");
+    lv_obj_t *labe2 = lv_label_create(lv_scr_act());
+    lv_obj_align_to(labe2, label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_label_set_text(labe2, "0");
+    lv_obj_t *labe3 = lv_label_create(lv_scr_act());
+    lv_obj_align_to(labe3, labe2, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_label_set_text(labe3, "0");
 
     while (1) {
         // rem = uxTaskGetStackHighWaterMark(Lcd_Stick_Task_Handler);
@@ -150,12 +253,8 @@ static void prvLcdDebugTask(void *pvParameters)
 
         // rem = uxTaskGetStackHighWaterMark(Led_Task_Handler);
         // printf("Led 剩余栈: %d 字, 已用栈: %d 字\r\n", rem, LED_TASK_STACK_SIZE - rem);
-        printf("-------------------------------\r\n");
-        rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
-        printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
-        printf("-------------------------------\r\n");
-        rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
-        printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
+
+
 
         // printf("------- LVGL Heap Stats -------\r\n");
         // uint32_t used_bytes = mon.total_size - mon.free_size;
@@ -166,35 +265,31 @@ static void prvLcdDebugTask(void *pvParameters)
         //     (unsigned int)mon.free_size,
         //     (unsigned int)mon.max_used,
         //     (unsigned int)mon.frag_pct);
-        
-        /* 获取堆统计信息 */
-        vPortGetHeapStats(&xHeapStats);
-        printf("----- FreeRTOS Heap Stats -----\r\n");
-        printf("Total Free: %lu bytes\r\n", xHeapStats.xAvailableHeapSpaceInBytes);
-        printf("Largest Free Block: %lu bytes\r\n", xHeapStats.xSizeOfLargestFreeBlockInBytes);
-        printf("Min Ever Free: %lu bytes\r\n", xHeapStats.xMinimumEverFreeBytesRemaining);
-        printf("Num Free Blocks: %lu\r\n", xHeapStats.xNumberOfFreeBlocks);
-        
 
+    printf("-------------------------------\r\n");
+    rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
+    printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
+    printf("-------------------------------\r\n");
+    rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
+    printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
 
-        
-        sprintf(buf, "%d", count++);
-        lv_label_set_text(label, buf);
+    HeapStats_t xHeapStats;
+    vPortGetHeapStats(&xHeapStats);
+    printf("----- FreeRTOS Heap Stats -----\r\n");
+    printf("Total Free: %lu bytes\r\n", xHeapStats.xAvailableHeapSpaceInBytes);
+    printf("Largest Free Block: %lu bytes\r\n", xHeapStats.xSizeOfLargestFreeBlockInBytes);
+    printf("Min Ever Free: %lu bytes\r\n", xHeapStats.xMinimumEverFreeBytesRemaining);
+    printf("Num Free Blocks: %lu\r\n", xHeapStats.xNumberOfFreeBlocks);
 
-        vTaskDelay(pdMS_TO_TICKS(5000));
-    }
-}
-
-uint16_t charge_voltage_mv = 0;
-static void prvAdcDataManageTask(void *pvParameters){
-
-    while (1)
-    {
-        ADC_Scan();
-        charge_voltage_mv = adc_charge_raw * 1000*(3.3f/4095) * (10+91)/10;
-
+    sprintf(buf, "%d  %d  %d", charge_status, charge_voltage_mv, adc_charge_raw);
+    lv_label_set_text(label, buf);
+    sprintf(buf, "%d  %d  %d  %.2f", battery_status, battery_voltage_mv, adc_battery_raw, m_SOC);
+    lv_label_set_text(labe2, buf);
+    sprintf(buf, "%d  %d  %d", adc_temperture_raw, Temperture_voltage, Temperture_voltage);
+    lv_label_set_text(labe3, buf);
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    
 }
+
+
