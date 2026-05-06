@@ -3,47 +3,34 @@
  *============================================================================*/
 #include "FreeRtosTask.h"
 
-/*============================================================================
- * 宏定义区
- *============================================================================*/
-/* 设置 lvgl 的心跳函数 */
-#define LCD_STICK_TASK_PRIO             9
-#define LCD_STICK_TASK_STACK_SIZE       400
-
-/* FreeRTOS 起始任务优先级和栈大小 */
-#define START_TASK_PRIO                 10
-#define START_TASK_STACK_SIZE           128
-
-/* lcd显示任务（实际为LED闪烁任务） */
-#define LED_TASK_PRIO                   5
-#define LED_TASK_STACK_SIZE             128
-
-/* 系统调试任务 */
-#define LCD_DEBUG_TASK_PRIO             8
-#define LCD_DEBUG_TASK_STACK_SIZE       512
-
-/* ADC 数据管理任务 */
-#define ADC_DATA_MANAGE_TASK_PRIO       5
-#define ADC_DATA_MANAGE_TASK_STACK_SIZE 512
+float battery_voltage_soc = 0;
+uint32_t charge_voltage_mv = 0;
+uint32_t battery_voltage_mv = 0;
+uint32_t Temperture_voltage = 0;
+typedef enum {
+    CHG_STATUS_IDLE = 0,      // 未充电
+    CHG_STATUS_OVP = 1,       // 过压
+    CHG_STATUS_NORMAL = 2,    // 充电中
+    CHG_STATUS_LOW = 3        // 电压低
+} chg_status_t;
+typedef enum {
+    BAT_STATUS_IDLE = 0,      // 电压极低
+    BAT_STATUS_OVP = 1,       // 过压
+    BAT_STATUS_NORMAL = 2,    // 电压正常
+    BAT_STATUS_LOW = 3        // 电压低
+} bat_status_t;
+chg_status_t charge_status;
+bat_status_t battery_status;
 
 /*============================================================================
  * 任务句柄声明区（静态全局变量）
  *============================================================================*/
-TaskHandle_t Lcd_Stick_Task_Handler;
 TaskHandle_t Start_Task_Handler;
-TaskHandle_t Led_Task_Handler;
+TaskHandle_t Lcd_Stick_Task_Handler;
 TaskHandle_t Lcd_Debug_Task_Handler;
+TaskHandle_t Led_Task_Handler;
 TaskHandle_t Adc_Data_Manage_Task_Handler;
-
-/*============================================================================
- * 函数声明区
- *============================================================================*/
-static void prvLcdStickTask(void *pvParameters);
-static void prvStartTask(void *pvParameters);
-static void prvLEDTask(void *pvParameters);
-static void prvLcdDebugTask(void *pvParameters);
-static void prvAdcDataManageTask(void *pvParameters);
-
+TaskHandle_t Lcd_Manage_Task_Handler;
 /*============================================================================
  * 函数实体区
  *============================================================================*/
@@ -84,6 +71,9 @@ static void prvStartTask(void *pvParameters)
     xTaskCreate(prvAdcDataManageTask,"prvAdcDataManageTask", ADC_DATA_MANAGE_TASK_STACK_SIZE,
                 NULL, ADC_DATA_MANAGE_TASK_PRIO, &Adc_Data_Manage_Task_Handler);
 
+    xTaskCreate(prvLcdManageTask,"prvLcdManageTask", LCD_MANAGE_TASK_STACK_SIZE,
+                NULL, LCD_MANAGE_TASK_PRIO, &Lcd_Manage_Task_Handler);
+
     printf("---------------------------\r\n");
     UBaseType_t rem = uxTaskGetStackHighWaterMark(Start_Task_Handler);
     printf("prvStartTask free: %d size, used: %d size\r\n", rem, START_TASK_STACK_SIZE - rem);
@@ -123,30 +113,74 @@ static void prvLEDTask(void *pvParameters)
     }
 }
 
+/**
+ * @brief       系统调试任务，打印栈和堆信息，更新 LVGL 标签
+ * @param       pvParameters 未使用
+ * @retval      无
+ * @note        每 5 秒输出一次各个任务的栈使用情况、LVGL 内存监控和 FreeRTOS 堆状态。
+ */
+static void prvLcdDebugTask(void *pvParameters)
+{
+  
+    lv_mem_monitor_t mon;
+    lv_mem_monitor(&mon);
 
-float m_SOC = 0;
-uint32_t charge_voltage_mv = 0;
-uint32_t battery_voltage_mv = 0;
-uint32_t Temperture_voltage = 0;
+    UBaseType_t rem;
 
-typedef enum {
-    CHG_STATUS_IDLE = 0,      // 未充电
-    CHG_STATUS_OVP = 1,       // 过压
-    CHG_STATUS_NORMAL = 2,    // 充电中
-    CHG_STATUS_LOW = 3        // 电压低
-} chg_status_t;
+    // char buf[20];
+    // lv_obj_t *label = lv_label_create(lv_scr_act());
+    // lv_obj_center(label); 
+    // lv_label_set_text(label, "0");
+    // lv_obj_t *labe2 = lv_label_create(lv_scr_act());
+    // lv_obj_align_to(labe2, label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    // lv_label_set_text(labe2, "0");
+    // lv_obj_t *labe3 = lv_label_create(lv_scr_act());
+    // lv_obj_align_to(labe3, labe2, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    // lv_label_set_text(labe3, "0");
 
-typedef enum {
-    BAT_STATUS_IDLE = 0,      // 电压极低
-    BAT_STATUS_OVP = 1,       // 过压
-    BAT_STATUS_NORMAL = 2,    // 电压正常
-    BAT_STATUS_LOW = 3        // 电压低
-} bat_status_t;
+    while (1) {
+        // rem = uxTaskGetStackHighWaterMark(Lcd_Stick_Task_Handler);
+        // printf("LcdStick 剩余栈: %d 字, 已用栈: %d 字\r\n", rem, LCD_STICK_TASK_STACK_SIZE - rem);
 
-chg_status_t charge_status;
-bat_status_t battery_status;
+        // rem = uxTaskGetStackHighWaterMark(Led_Task_Handler);
+        // printf("Led 剩余栈: %d 字, 已用栈: %d 字\r\n", rem, LED_TASK_STACK_SIZE - rem);
+        printf("-------------------------------\r\n");
+        rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
+        printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
+        printf("-------------------------------\r\n");
+        rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
+        printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
 
-// ====================== 修改任务函数，使用外部静态变量 ======================
+
+        printf("------- LVGL Heap Stats -------\r\n");
+        uint32_t used_bytes = mon.total_size - mon.free_size;
+        printf("Total: %u bytes, Used: %u bytes (%.1f%%), Free: %u bytes, Max used: %u bytes, Frag: %u%%\r\n",
+            (unsigned int)mon.total_size,
+            (unsigned int)used_bytes,
+            (float)(used_bytes * 100.0f / mon.total_size),
+            (unsigned int)mon.free_size,
+            (unsigned int)mon.max_used,
+            (unsigned int)mon.frag_pct);
+
+        HeapStats_t xHeapStats;
+        vPortGetHeapStats(&xHeapStats);
+        printf("----- FreeRTOS Heap Stats -----\r\n");
+        printf("Total Free: %lu bytes\r\n", xHeapStats.xAvailableHeapSpaceInBytes);
+        printf("Largest Free Block: %lu bytes\r\n", xHeapStats.xSizeOfLargestFreeBlockInBytes);
+        printf("Min Ever Free: %lu bytes\r\n", xHeapStats.xMinimumEverFreeBytesRemaining);
+        printf("Num Free Blocks: %lu\r\n", xHeapStats.xNumberOfFreeBlocks);
+
+        // sprintf(buf, "%d  %d  %d", charge_status, charge_voltage_mv, adc_charge_raw);
+        // lv_label_set_text(label, buf);
+        // sprintf(buf, "%d  %d  %d  %.2f", battery_status, battery_voltage_mv, adc_battery_raw, battery_voltage_soc);
+        // lv_label_set_text(labe2, buf);
+        // sprintf(buf, "%d  %d  %d", adc_temperture_raw, Temperture_voltage, Temperture_voltage);
+        // lv_label_set_text(labe3, buf);
+
+        vTaskDelay(pdMS_TO_TICKS(5000));
+    }
+}
+
 static void prvAdcDataManageTask(void *pvParameters)
 {
     ADC_Scan();
@@ -185,8 +219,7 @@ static void prvAdcDataManageTask(void *pvParameters)
         } else {
             battery_status = BAT_STATUS_IDLE;
         }
-        m_SOC = battery_voltage_mv / 1000.0f / 4.0f * 100.0f;
-
+        battery_voltage_soc = battery_voltage_mv / 1000.0f / 4.0f * 100.0f;
 
         temperture_sum = temperture_sum - temperture_buffer[temperture_buffer_index] + adc_temperture_raw;
         temperture_buffer[temperture_buffer_index] = adc_temperture_raw;
@@ -222,74 +255,52 @@ static void prvAdcDataManageTask(void *pvParameters)
     }
 }
 
-/**
- * @brief       系统调试任务，打印栈和堆信息，更新 LVGL 标签
- * @param       pvParameters 未使用
- * @retval      无
- * @note        每 5 秒输出一次各个任务的栈使用情况、LVGL 内存监控和 FreeRTOS 堆状态。
- */
-static void prvLcdDebugTask(void *pvParameters)
+
+static void scr_btn_event_cb(lv_event_t *e)
 {
-  
-    lv_mem_monitor_t mon;
-    lv_mem_monitor(&mon);
+    lv_obj_t *btn = lv_event_get_target(e);
+    const char *text = lv_label_get_text(lv_obj_get_child(btn, 0));  // 获取按钮上的标签文字
 
-    UBaseType_t rem;
-
-    char buf[20];
-    lv_obj_t *label = lv_label_create(lv_scr_act());
-    lv_obj_center(label);
-    lv_label_set_text(label, "0");
-    lv_obj_t *labe2 = lv_label_create(lv_scr_act());
-    lv_obj_align_to(labe2, label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-    lv_label_set_text(labe2, "0");
-    lv_obj_t *labe3 = lv_label_create(lv_scr_act());
-    lv_obj_align_to(labe3, labe2, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-    lv_label_set_text(labe3, "0");
-
-    while (1) {
-        // rem = uxTaskGetStackHighWaterMark(Lcd_Stick_Task_Handler);
-        // printf("LcdStick 剩余栈: %d 字, 已用栈: %d 字\r\n", rem, LCD_STICK_TASK_STACK_SIZE - rem);
-
-        // rem = uxTaskGetStackHighWaterMark(Led_Task_Handler);
-        // printf("Led 剩余栈: %d 字, 已用栈: %d 字\r\n", rem, LED_TASK_STACK_SIZE - rem);
-
-
-
-        // printf("------- LVGL Heap Stats -------\r\n");
-        // uint32_t used_bytes = mon.total_size - mon.free_size;
-        // printf("Total: %u bytes, Used: %u bytes (%.1f%%), Free: %u bytes, Max used: %u bytes, Frag: %u%%\r\n",
-        //     (unsigned int)mon.total_size,
-        //     (unsigned int)used_bytes,
-        //     (float)(used_bytes * 100.0f / mon.total_size),
-        //     (unsigned int)mon.free_size,
-        //     (unsigned int)mon.max_used,
-        //     (unsigned int)mon.frag_pct);
-
-    printf("-------------------------------\r\n");
-    rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
-    printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
-    printf("-------------------------------\r\n");
-    rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
-    printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
-
-    HeapStats_t xHeapStats;
-    vPortGetHeapStats(&xHeapStats);
-    printf("----- FreeRTOS Heap Stats -----\r\n");
-    printf("Total Free: %lu bytes\r\n", xHeapStats.xAvailableHeapSpaceInBytes);
-    printf("Largest Free Block: %lu bytes\r\n", xHeapStats.xSizeOfLargestFreeBlockInBytes);
-    printf("Min Ever Free: %lu bytes\r\n", xHeapStats.xMinimumEverFreeBytesRemaining);
-    printf("Num Free Blocks: %lu\r\n", xHeapStats.xNumberOfFreeBlocks);
-
-    sprintf(buf, "%d  %d  %d", charge_status, charge_voltage_mv, adc_charge_raw);
-    lv_label_set_text(label, buf);
-    sprintf(buf, "%d  %d  %d  %.2f", battery_status, battery_voltage_mv, adc_battery_raw, m_SOC);
-    lv_label_set_text(labe2, buf);
-    sprintf(buf, "%d  %d  %d", adc_temperture_raw, Temperture_voltage, Temperture_voltage);
-    lv_label_set_text(labe3, buf);
-
-        vTaskDelay(pdMS_TO_TICKS(1000));
+    if (e->code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Selected: %s", text);
+        /* 这里可以执行进一步的动作，比如切换屏幕、改变参数等 */
     }
 }
+
+static void prvLcdManageTask(void *pvParameters){
+    lv_obj_t *scr = lv_obj_create(NULL);
+    lv_scr_load(scr);
+    lv_group_t *scr_group = lv_group_create();
+    lv_indev_set_group(indev_keypad, scr_group);
+    const char *options[] = {"texts1", "texts2", "texts3"};
+    
+    for (int i = 0; i < 3; i++)
+    {
+        lv_obj_t *btn = lv_btn_create(scr);
+        lv_obj_set_size(btn,80,40);
+        lv_obj_set_pos(btn,40+i*160,140);
+
+        lv_obj_set_style_border_width(btn,0,LV_STATE_DEFAULT);
+        lv_obj_set_style_border_width(btn,5,LV_STATE_FOCUSED);
+        lv_obj_set_style_border_color(btn,lv_color_hex(0x33519C),LV_STATE_FOCUSED);
+
+        lv_obj_t *label = lv_label_create(btn);
+        lv_label_set_text(label, options[i]);
+        lv_obj_center(label);
+
+        lv_obj_add_event_cb(btn,scr_btn_event_cb,LV_EVENT_CLICKED,NULL);
+
+        lv_group_add_obj(scr_group,btn);
+
+        lv_group_focus_obj(lv_obj_get_child(scr, 0));
+    }
+    
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    
+}
+
 
 

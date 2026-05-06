@@ -76,6 +76,7 @@ static void keypad_init(void)
     key_Init();
     /*Your code comes here*/
 }
+uint32_t act_key1111;
 /*Will be called by the library to read the mouse*/
 static void keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
@@ -91,28 +92,28 @@ static void keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 
         /*Translate the keys to LVGL control characters according to your key definitions*/
         switch(act_key) {
-        case 1:
+        case LV_KEY_UP:
             act_key = LV_KEY_UP;
             break;
-        case 2:
+        case LV_KEY_LEFT:
             act_key = LV_KEY_LEFT;
             break;
-        case 3:
+        case LV_KEY_RIGHT:
             act_key = LV_KEY_RIGHT;
             break;
-        case 4:
-            act_key = LV_KEY_UP;
+        case LV_KEY_DOWN:
+            act_key = LV_KEY_DOWN;
             break;
-        case 5:
+        case LV_KEY_ENTER:
             act_key = LV_KEY_ENTER;
             break;
-        case 6:
+        case LV_KEY_ESC:
             act_key = LV_KEY_ESC;
             break;
-        case 7:
+        case LV_KEY_NEXT:
             act_key = LV_KEY_NEXT;
             break;
-        case 8:
+        case LV_KEY_PREV:
             act_key = LV_KEY_PREV;
             break;
 
@@ -130,8 +131,8 @@ static void keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 static uint32_t keypad_get_key(void)
 {
     /*Your code comes here*/
+    act_key1111 = key_GetId();
     return (uint32_t)key_GetId();
-    // return key_GetId();
 }
 
 #else /*Enable this file at the top*/

@@ -1,5 +1,6 @@
 #include "Key.h"
 #include <stdbool.h>
+#include "../../lvgl.h"
 /*============================================================================
  * 函数实体区
  *============================================================================*/
@@ -47,14 +48,14 @@ uint8_t key_GetId(void)
     uint8_t ret = 0;
 
     // 检测下降沿（上次为高，本次为低）
-    if (!B1_last && !B1_data) ret = 1;
-    if (!B2_last && !B2_data) ret = 2;
-    if (!B3_last && !B3_data) ret = 3;
-    if (!B4_last && !B4_data) ret = 4;
-    if (!B5_last && !B5_data) ret = 5;
-    if (!B6_last && !B6_data) ret = 6;
-    if (!B7_last && !B7_data) ret = 7;
-    if (!B8_last && !B8_data) ret = 8;
+    if (!B1_last && !B1_data) ret = LV_KEY_LEFT;
+    if (!B2_last && !B2_data) ret = LV_KEY_DOWN;
+    if (!B3_last && !B3_data) ret = LV_KEY_RIGHT;
+    if (!B4_last && !B4_data) ret = LV_KEY_UP;
+    if (!B5_last && !B5_data) ret = LV_KEY_ENTER;
+    if (!B6_last && !B6_data) ret = LV_KEY_ESC;
+    if (!B7_last && !B7_data) ret = LV_KEY_NEXT;
+    if (!B8_last && !B8_data) ret = LV_KEY_PREV;
     
     // 更新所有上次状态（为下次检测准备）
     B1_last = B1_data;
