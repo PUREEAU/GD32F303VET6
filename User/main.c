@@ -2,9 +2,7 @@
 
 void Diver_Init(void)
 {
-    lv_init();
-    lv_port_disp_init();
-    lv_port_indev_init();
+    Gui_Init();
     
     ADC_Init();
     adc_filter_prefill();

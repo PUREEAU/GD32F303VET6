@@ -340,7 +340,7 @@
               <MiscControls>--diag_suppress=1,1362,188,546,111,68</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS;..\Libraries\CMSIS\GD\GD32F30x\Include;..\Libraries\GD32F30x_standard_peripheral\Include;..\User;..\LVGL\GUI;..\LVGL\GUI\lvgl;..\LVGL\GUI\lvgl\src;..\LVGL\GUI\lvgl\examples\porting;..\LVGL\GUI_APP\demos;..\LVGL\GUI_APP\demos\stress;..\FreeRTOS;..\FreeRTOS\include;..\FreeRTOS\portable\MemMang;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\Handware;..\Handware\ADC;..\Handware\KEY;..\Handware\LCD</IncludePath>
+              <IncludePath>..\Libraries\CMSIS;..\Libraries\CMSIS\GD\GD32F30x\Include;..\Libraries\GD32F30x_standard_peripheral\Include;..\User;..\LVGL\GUI;..\LVGL\GUI\lvgl;..\LVGL\GUI\lvgl\src;..\LVGL\GUI\lvgl\examples\porting;..\LVGL\GUI_APP\demos;..\LVGL\GUI_APP\demos\stress;..\FreeRTOS;..\FreeRTOS\include;..\FreeRTOS\portable\MemMang;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\Handware;..\Handware\ADC;..\Handware\KEY;..\Handware\LCD;..\Handware\UART</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1478,6 +1478,16 @@
               <FileName>Adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Handware\ADC\Adc.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Handware/UART</GroupName>
+          <Files>
+            <File>
+              <FileName>Uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\UART\Uart.c</FilePath>
             </File>
           </Files>
         </Group>

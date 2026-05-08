@@ -15,6 +15,7 @@
 
 #include "Adc.h"
 #include "Uart.h"
+#include "Gui.h"
 
 void vTaskSchedule(void);
 
@@ -43,7 +44,7 @@ void vTaskSchedule(void);
 
 /* LCD 管理任务 */
 #define LCD_MANAGE_TASK_PRIO            5
-#define LCD_MANAGE_TASK_STACK_SIZE      1 * 1024
+#define LCD_MANAGE_TASK_STACK_SIZE      512
 
 /*============================================================================
  * 函数声明区
@@ -55,5 +56,13 @@ static void prvLcdDebugTask(void *pvParameters);
 static void prvLEDTask(void *pvParameters);
 static void prvAdcDataManageTask(void *pvParameters);
 static void prvLcdManageTask(void *pvParameters);
+
+
+
+extern float battery_voltage_soc;
+
+
+
+
 
 #endif /* __FREERTOS_TASK_H__ */

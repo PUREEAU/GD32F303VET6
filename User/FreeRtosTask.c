@@ -126,31 +126,17 @@ static void prvLcdDebugTask(void *pvParameters)
     lv_mem_monitor(&mon);
 
     UBaseType_t rem;
-
-    // char buf[20];
-    // lv_obj_t *label = lv_label_create(lv_scr_act());
-    // lv_obj_center(label); 
-    // lv_label_set_text(label, "0");
-    // lv_obj_t *labe2 = lv_label_create(lv_scr_act());
-    // lv_obj_align_to(labe2, label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-    // lv_label_set_text(labe2, "0");
-    // lv_obj_t *labe3 = lv_label_create(lv_scr_act());
-    // lv_obj_align_to(labe3, labe2, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-    // lv_label_set_text(labe3, "0");
-
     while (1) {
-        // rem = uxTaskGetStackHighWaterMark(Lcd_Stick_Task_Handler);
-        // printf("LcdStick Ê£ÓàÕ»: %d ×Ö, ÒÑÓÃÕ»: %d ×Ö\r\n", rem, LCD_STICK_TASK_STACK_SIZE - rem);
 
-        // rem = uxTaskGetStackHighWaterMark(Led_Task_Handler);
-        // printf("Led Ê£ÓàÕ»: %d ×Ö, ÒÑÓÃÕ»: %d ×Ö\r\n", rem, LED_TASK_STACK_SIZE - rem);
-        printf("-------------------------------\r\n");
+        printf("-----------------------------------------\r\n");
         rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
         printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
-        printf("-------------------------------\r\n");
+        printf("-----------------------------------------\r\n");
         rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
         printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
-
+        printf("-----------------------------------------\r\n");
+        rem = uxTaskGetStackHighWaterMark(Lcd_Manage_Task_Handler);
+        printf("Lcd_Manage_Task_Handler free: %d size, used: %d size\r\n", rem, LCD_MANAGE_TASK_STACK_SIZE - rem);
 
         printf("------- LVGL Heap Stats -------\r\n");
         uint32_t used_bytes = mon.total_size - mon.free_size;
@@ -164,18 +150,11 @@ static void prvLcdDebugTask(void *pvParameters)
 
         HeapStats_t xHeapStats;
         vPortGetHeapStats(&xHeapStats);
-        printf("----- FreeRTOS Heap Stats -----\r\n");
+        printf("---------- FreeRTOS Heap Stats ----------\r\n");
         printf("Total Free: %lu bytes\r\n", xHeapStats.xAvailableHeapSpaceInBytes);
         printf("Largest Free Block: %lu bytes\r\n", xHeapStats.xSizeOfLargestFreeBlockInBytes);
         printf("Min Ever Free: %lu bytes\r\n", xHeapStats.xMinimumEverFreeBytesRemaining);
         printf("Num Free Blocks: %lu\r\n", xHeapStats.xNumberOfFreeBlocks);
-
-        // sprintf(buf, "%d  %d  %d", charge_status, charge_voltage_mv, adc_charge_raw);
-        // lv_label_set_text(label, buf);
-        // sprintf(buf, "%d  %d  %d  %.2f", battery_status, battery_voltage_mv, adc_battery_raw, battery_voltage_soc);
-        // lv_label_set_text(labe2, buf);
-        // sprintf(buf, "%d  %d  %d", adc_temperture_raw, Temperture_voltage, Temperture_voltage);
-        // lv_label_set_text(labe3, buf);
 
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
@@ -268,36 +247,10 @@ static void scr_btn_event_cb(lv_event_t *e)
 }
 
 static void prvLcdManageTask(void *pvParameters){
-    lv_obj_t *scr = lv_obj_create(NULL);
-    lv_scr_load(scr);
-    lv_group_t *scr_group = lv_group_create();
-    lv_indev_set_group(indev_keypad, scr_group);
-    const char *options[] = {"texts1", "texts2", "texts3"};
-    
-    for (int i = 0; i < 3; i++)
-    {
-        lv_obj_t *btn = lv_btn_create(scr);
-        lv_obj_set_size(btn,80,40);
-        lv_obj_set_pos(btn,40+i*160,140);
-
-        lv_obj_set_style_border_width(btn,0,LV_STATE_DEFAULT);
-        lv_obj_set_style_border_width(btn,5,LV_STATE_FOCUSED);
-        lv_obj_set_style_border_color(btn,lv_color_hex(0x33519C),LV_STATE_FOCUSED);
-
-        lv_obj_t *label = lv_label_create(btn);
-        lv_label_set_text(label, options[i]);
-        lv_obj_center(label);
-
-        lv_obj_add_event_cb(btn,scr_btn_event_cb,LV_EVENT_CLICKED,NULL);
-
-        lv_group_add_obj(scr_group,btn);
-
-        lv_group_focus_obj(lv_obj_get_child(scr, 0));
-    }
-    
+    ZHUjiemanshezhi();
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
     
 }
