@@ -1,5 +1,4 @@
 #include "Gui.h"
-
 void Gui_Init(void){
     lv_init();
     lv_port_disp_init();
@@ -7,6 +6,12 @@ void Gui_Init(void){
     lv_disp_t *disp = lv_disp_get_default();
     lv_theme_t *th = lv_theme_basic_init(disp);
     lv_disp_set_theme(disp, th);
+}
+
+static void btn_event_cb(lv_event_t * e){
+    lv_obj_t * btn = lv_event_get_target(e);
+    int page_id = (int)lv_obj_get_user_data(btn);
+    printf("%d\r\n",page_id);
 }
 
 void ZHUjiemanshezhi(void){
@@ -63,16 +68,19 @@ void ZHUjiemanshezhi(void){
     lv_indev_set_group(indev_keypad, group);
 
     for (uint8_t i = 0; i < BTN_COUNT; i++) {
+
         lv_obj_t * btn = lv_btn_create(bottom_status_bar);
         lv_obj_set_style_radius(btn, 10, LV_STATE_DEFAULT);
         lv_obj_set_style_bg_color(btn, lv_color_hex(0xD2E0CF), LV_STATE_DEFAULT);
-
         lv_obj_set_style_shadow_width(btn, 0, 0);
-        lv_obj_set_style_outline_width(btn, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
         lv_obj_set_style_border_width(btn, 4, LV_STATE_FOCUSED);
         lv_obj_set_style_border_color(btn, lv_color_hex(0x3A6B47), LV_STATE_FOCUSED);
+        lv_obj_set_style_outline_width(btn, 0, LV_PART_MAIN | LV_STATE_FOCUS_KEY);
+        lv_obj_set_style_outline_width(btn, 5, LV_STATE_PRESSED);
+        lv_obj_set_style_outline_color(btn, lv_color_hex(0x3A6B47), LV_STATE_FOCUSED);
         lv_obj_set_style_text_font(btn,&lv_font_montserrat_14,LV_STATE_DEFAULT);
-        
+        lv_obj_set_user_data(btn, (void*)(intptr_t)i);
+        lv_obj_add_event_cb(btn,btn_event_cb,LV_EVENT_CLICKED,NULL);
 
         lv_obj_t * label = lv_label_create(btn);
         char text[10];
@@ -85,7 +93,9 @@ void ZHUjiemanshezhi(void){
         lv_obj_set_grid_cell(btn, 
             LV_GRID_ALIGN_STRETCH, i % COL_NUM, 1,
             LV_GRID_ALIGN_STRETCH, i / COL_NUM, 1);
+
     }
+
 
     while (1)
     {
@@ -93,5 +103,4 @@ void ZHUjiemanshezhi(void){
         lv_label_set_text(icon_label, buf);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
-
 }
