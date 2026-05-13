@@ -28,10 +28,10 @@ void vTaskSchedule(void);
 
  /* 设置 lvgl 的心跳函数 */
 #define LCD_STICK_TASK_PRIO             9
-#define LCD_STICK_TASK_STACK_SIZE       400
+#define LCD_STICK_TASK_STACK_SIZE       512
 
 /* 系统调试任务 */
-#define LCD_DEBUG_TASK_PRIO             8
+#define LCD_DEBUG_TASK_PRIO             4
 #define LCD_DEBUG_TASK_STACK_SIZE       512
 
 /* lcd显示任务（实际为LED闪烁任务） */
@@ -60,7 +60,9 @@ static void prvLcdManageTask(void *pvParameters);
 
 
 extern float battery_voltage_soc;
-
+extern uint32_t charge_voltage_mv;
+extern uint32_t battery_voltage_mv;
+extern uint32_t Temperture_voltage;
 
 
 

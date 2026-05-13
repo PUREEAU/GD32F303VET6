@@ -121,32 +121,31 @@ static void prvLEDTask(void *pvParameters)
  */
 static void prvLcdDebugTask(void *pvParameters)
 {
-  
-    lv_mem_monitor_t mon;
-    lv_mem_monitor(&mon);
-
     UBaseType_t rem;
     while (1) {
+        lv_mem_monitor_t mon;
+        lv_mem_monitor(&mon);   // 每次循环获取最新内存信息
 
-        printf("-----------------------------------------\r\n");
-        rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
-        printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
-        printf("-----------------------------------------\r\n");
-        rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
-        printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
+        // printf("-----------------------------------------\r\n");
+        // rem = uxTaskGetStackHighWaterMark(Lcd_Debug_Task_Handler);
+        // printf("LcdDebug free: %d size, used: %d size\r\n", rem, LCD_DEBUG_TASK_STACK_SIZE - rem);
+        
+        // printf("-----------------------------------------\r\n");
+        // rem = uxTaskGetStackHighWaterMark(Adc_Data_Manage_Task_Handler);
+        // printf("AdcDataManage free: %d size, used: %d size\r\n", rem, ADC_DATA_MANAGE_TASK_STACK_SIZE - rem);
+        
         printf("-----------------------------------------\r\n");
         rem = uxTaskGetStackHighWaterMark(Lcd_Manage_Task_Handler);
         printf("Lcd_Manage_Task_Handler free: %d size, used: %d size\r\n", rem, LCD_MANAGE_TASK_STACK_SIZE - rem);
 
-        printf("------- LVGL Heap Stats -------\r\n");
-        uint32_t used_bytes = mon.total_size - mon.free_size;
-        printf("Total: %u bytes, Used: %u bytes (%.1f%%), Free: %u bytes, Max used: %u bytes, Frag: %u%%\r\n",
-            (unsigned int)mon.total_size,
-            (unsigned int)used_bytes,
-            (float)(used_bytes * 100.0f / mon.total_size),
-            (unsigned int)mon.free_size,
-            (unsigned int)mon.max_used,
-            (unsigned int)mon.frag_pct);
+        // printf("------- LVGL Heap Stats -------\r\n");
+        // printf("Total: %lu bytes, Used: %lu bytes (%.1f%%), Free: %lu bytes, Max used: %lu bytes, Frag: %u%%\r\n",
+        //        mon.total_size,
+        //        mon.total_size - mon.free_size,   // 已用字节 = 总大小 - 空闲大小
+        //        (float)(mon.total_size - mon.free_size) * 100.0f / mon.total_size,
+        //        mon.free_size,
+        //        mon.max_used,
+        //        mon.frag_pct);
 
         HeapStats_t xHeapStats;
         vPortGetHeapStats(&xHeapStats);
@@ -234,22 +233,41 @@ static void prvAdcDataManageTask(void *pvParameters)
     }
 }
 
-
-static void scr_btn_event_cb(lv_event_t *e)
-{
-    lv_obj_t *btn = lv_event_get_target(e);
-    const char *text = lv_label_get_text(lv_obj_get_child(btn, 0));  // 获取按钮上的标签文字
-
-    if (e->code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Selected: %s", text);
-        /* 这里可以执行进一步的动作，比如切换屏幕、改变参数等 */
-    }
-}
-
 static void prvLcdManageTask(void *pvParameters){
-    ZHUjiemanshezhi();
+
+    createMainInterface();
+    
     while (1)
     {
+        taskENTER_CRITICAL();
+        mainmenukeyboardNavPointer = 0;
+        mainMenuButtonChoice();
+        taskEXIT_CRITICAL();
+        while (!mainmenukeyboardNavPointer)
+        {
+            vTaskDelay(pdMS_TO_TICKS(100));
+            if(shutdownDevice){
+                vTaskDelay(pdMS_TO_TICKS(100));
+                mainmenukeyboardNavPointer = 0xFF;
+                break;
+            }
+        }
+
+        switch (mainmenukeyboardNavPointer)
+        {
+            case 1:
+                settingsModeInterface();
+            break;
+
+            default:
+            break;
+        }
+
+        while(mainmenukeyboardNavPointer)
+        {
+            vTaskDelay(50);
+        }
+
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
     

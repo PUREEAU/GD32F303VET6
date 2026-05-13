@@ -1459,6 +1459,11 @@
               <FileType>1</FileType>
               <FilePath>..\Handware\LCD\exmc_lcd.c</FilePath>
             </File>
+            <File>
+              <FileName>Gui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Handware\LCD\Gui.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
