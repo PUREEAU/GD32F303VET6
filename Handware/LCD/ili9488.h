@@ -172,4 +172,8 @@ void LCD_Printf(const char * sFormat, ...);                     /* ∏Ò ΩªØ¥Ú”°£®¿
 void LCD_ShowLog(void);                                         /* œ‘ æ»’÷æ–≈œ¢£®µ˜ ‘”√£© */
 void Gui_Drawbmp16(uint16_t x, uint16_t y, const unsigned char *p); /* œ‘ æ 40x40 BMP Õº∆¨ */
 
+
+void lcd_Screen_Init(void);
+void lcd_Screen_Set(unsigned int  ccr);
+
 #endif

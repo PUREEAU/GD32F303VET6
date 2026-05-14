@@ -1099,3 +1099,52 @@ void __aeabi_assert(const char *expr, const char *file, int line)
 {
     while(1); // 进入死循环
 }
+
+#define LCD_SCREEN_RCU_GPIO RCU_GPIOA
+#define LCD_SCREEN_GPIO GPIOA
+#define LCD_SCREEN_GPIO_PIN GPIO_PIN_1
+
+void lcd_Screen_Init(void){
+    rcu_periph_clock_enable(LCD_SCREEN_RCU_GPIO);
+    rcu_periph_clock_enable(RCU_AF);
+    gpio_init(LCD_SCREEN_GPIO,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,LCD_SCREEN_GPIO_PIN);
+
+    rcu_periph_clock_enable(RCU_TIMER1);
+    timer_deinit(TIMER1);
+    /* 初始化定时器时基单元 */
+    timer_parameter_struct timer_initpara;
+    timer_initpara.prescaler         = 1199;
+    timer_initpara.alignedmode       = TIMER_COUNTER_EDGE; // 边沿对齐模式
+    timer_initpara.counterdirection  = TIMER_COUNTER_UP;   // 向上计数
+    timer_initpara.period            = 99;
+    timer_initpara.clockdivision     = TIMER_CKDIV_DIV1;   // 不分频
+    timer_initpara.repetitioncounter = 0;        // 重复计数器，仅高级定时器适用
+    timer_init(TIMER1, &timer_initpara);
+
+    /* 初始化输出比较通道 */
+    timer_oc_parameter_struct timer_ocinitpara;
+    timer_ocinitpara.outputstate  = TIMER_CCX_ENABLE;
+    timer_ocinitpara.outputnstate = TIMER_CCXN_DISABLE;
+    timer_ocinitpara.ocpolarity   = TIMER_OC_POLARITY_HIGH;
+    timer_ocinitpara.ocnpolarity  = TIMER_OCN_POLARITY_HIGH;
+    timer_ocinitpara.ocidlestate  = TIMER_OC_IDLE_STATE_LOW;
+    timer_ocinitpara.ocnidlestate = TIMER_OCN_IDLE_STATE_LOW;
+    timer_channel_output_config(TIMER1, TIMER_CH_1, &timer_ocinitpara);
+
+    /* 4. 配置PWM模式并设置占空比 */
+    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, 100); // 设置比较值（占空比）
+    timer_channel_output_mode_config(TIMER1, TIMER_CH_1, TIMER_OC_MODE_PWM0); // 选择PWM模式0
+    timer_channel_output_shadow_config(TIMER1, TIMER_CH_1, TIMER_OC_SHADOW_DISABLE);
+    
+    timer_auto_reload_shadow_enable(TIMER1);
+    timer_enable(TIMER1);
+}
+
+void lcd_Screen_Set(unsigned int  ccr){
+
+    if(ccr<=0) ccr=1;
+    if(ccr>100) ccr=100;
+
+    timer_channel_output_pulse_value_config(TIMER1, TIMER_CH_1, ccr); // 设置比较值（占空比）
+
+}

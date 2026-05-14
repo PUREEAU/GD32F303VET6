@@ -111,6 +111,8 @@ void mainMenuButtonChoice(void){
 //        lv_label_set_text(icon_label, buf);
 //        vTaskDelay(pdMS_TO_TICKS(1000));
 //    }
+lv_obj_t * Screen_BrightnessSlider = NULL;
+lv_obj_t * ScreenSlider_ContentLabel = NULL;
 static void settingMode_TabViewanim_event_cb(lv_event_t * e)
 {
     if(lv_event_get_code(e) == LV_EVENT_SCROLL_BEGIN) {
@@ -149,11 +151,21 @@ static void button_event_setting_tab1(lv_event_t* e)
     // }
 }
 
+static void settingScreenslider_event_cb(lv_event_t * e)
+{
+    lv_obj_t * slider = lv_event_get_target(e);
+    uint8_t value=lv_slider_get_value(slider);
+    lv_slider_set_value(slider,value,LV_ANIM_ON);
+    char buf[8];
+    lv_snprintf(buf, sizeof(buf), "%d%%", value);
+    lv_label_set_text(ScreenSlider_ContentLabel, buf);
+    lcd_Screen_Set(value);
+
+}
 void settingsModeInterface(void){
 
-    if(bottom_status_bar != NULL){ 
+    if(bottom_status_bar != NULL){
         lv_obj_clean(bottom_status_bar);
-        vTaskDelay(pdMS_TO_TICKS(100));
     }
     lv_obj_set_style_pad_hor(bottom_status_bar,0,LV_STATE_DEFAULT);// 设置水平内边距
     lv_obj_set_style_pad_ver(bottom_status_bar,0,LV_STATE_DEFAULT);// 设置垂直内边距
@@ -165,6 +177,7 @@ void settingsModeInterface(void){
     lv_group_t * tab_group = lv_group_create();
     lv_indev_set_group(indev_keypad,tab_group);
     lv_group_add_obj(tab_group,settingMode_TabView_TabBtn);
+    
 
     lv_obj_set_style_bg_color(settingMode_TabView_TabBtn, lv_color_hex(0xD2E0CF), LV_PART_ITEMS);
     lv_obj_set_style_bg_color(settingMode_TabView_TabBtn, lv_color_hex(0xD2E0CF), LV_PART_ITEMS | LV_STATE_PRESSED);
@@ -223,11 +236,54 @@ void settingsModeInterface(void){
         Temperture_voltage);
     lv_label_set_text(Status_ContentLabel, Setting_ContentLabel_text);
 
+    lv_obj_t * Screen_Titlelabel = lv_label_create(Screen_tab);
+    lv_label_set_recolor(Screen_Titlelabel, true);
+    lv_label_set_text(Screen_Titlelabel,"#0000FF PureEau  # #007000 Screen  # #FF0000 Setting#");
+    lv_obj_align(Screen_Titlelabel, LV_ALIGN_TOP_MID,0,10);
+    lv_obj_t * Screen_ContentLabel = lv_label_create(Screen_tab);
+    lv_obj_set_pos(Screen_ContentLabel, 5, 40);
+    snprintf(Setting_ContentLabel_text, sizeof(Setting_ContentLabel_text),
+        "#FF0000 Set screen background brightness #");
+    lv_label_set_recolor(Screen_ContentLabel, true);
+    lv_label_set_text(Screen_ContentLabel, Setting_ContentLabel_text);
+
+    static lv_style_t Screen_BrightnessSlider_main;
+    static lv_style_t Screen_BrightnessSlider_indicator;
+    static lv_style_t Screen_BrightnessSlider_knob;
+    lv_style_init(&Screen_BrightnessSlider_main);
+    lv_style_set_bg_color(&Screen_BrightnessSlider_main, lv_color_hex(0x6E8F79));
+    lv_style_set_radius(&Screen_BrightnessSlider_main, LV_RADIUS_CIRCLE);
+    lv_style_init(&Screen_BrightnessSlider_indicator);
+    lv_style_set_bg_color(&Screen_BrightnessSlider_indicator, lv_color_hex(0x597E68));
+    lv_style_set_radius(&Screen_BrightnessSlider_indicator, LV_RADIUS_CIRCLE);
+    lv_style_init(&Screen_BrightnessSlider_knob);
+    lv_style_set_bg_color(&Screen_BrightnessSlider_knob, lv_color_hex(0x4A6B5A));
+    lv_style_set_radius(&Screen_BrightnessSlider_knob, LV_RADIUS_CIRCLE);
+    lv_style_set_pad_all(&Screen_BrightnessSlider_knob, 4); 
+    Screen_BrightnessSlider = lv_slider_create(Screen_tab);
+    lv_obj_add_style(Screen_BrightnessSlider, &Screen_BrightnessSlider_main, LV_PART_MAIN);
+    lv_obj_add_style(Screen_BrightnessSlider, &Screen_BrightnessSlider_indicator, LV_PART_INDICATOR);
+    lv_obj_add_style(Screen_BrightnessSlider, &Screen_BrightnessSlider_knob, LV_PART_KNOB);
+    lv_obj_set_pos(Screen_BrightnessSlider, 22, 100);
+    lv_obj_set_size(Screen_BrightnessSlider, 340, 20);
+    lv_obj_set_style_outline_width(Screen_BrightnessSlider, 4, LV_PART_INDICATOR | LV_STATE_FOCUSED);
+    lv_obj_set_style_outline_color(Screen_BrightnessSlider, lv_color_hex(0xB5FFD0), LV_PART_INDICATOR | LV_STATE_FOCUSED);
+    lv_obj_set_style_outline_opa(Screen_BrightnessSlider, LV_OPA_70, LV_PART_INDICATOR | LV_STATE_FOCUSED);
+    lv_slider_set_range(Screen_BrightnessSlider, 0, 100);
+    lv_slider_set_mode(Screen_BrightnessSlider, LV_SLIDER_MODE_NORMAL);
+    lv_obj_add_flag(Screen_BrightnessSlider, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_slider_set_value(Screen_BrightnessSlider, 100, LV_ANIM_ON);
+    ScreenSlider_ContentLabel = lv_label_create(Screen_tab);
+    lv_obj_align(ScreenSlider_ContentLabel, LV_ALIGN_TOP_MID,0,130);
+    lv_label_set_text(ScreenSlider_ContentLabel, "100 %");
+    lv_obj_add_event_cb(Screen_BrightnessSlider, settingScreenslider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_group_add_obj(tab_group, Screen_BrightnessSlider);
 
     static lv_style_t settingText_LineSpace;
     lv_style_init(&settingText_LineSpace);
     lv_style_set_text_line_space(&settingText_LineSpace, 15); 
     lv_obj_add_style(About_ContentLabel, &settingText_LineSpace, 0);
     lv_obj_add_style(Status_ContentLabel, &settingText_LineSpace, 0);
-    
+    lv_obj_add_style(Screen_ContentLabel, &settingText_LineSpace, 0);
+
 }

@@ -3,7 +3,7 @@
 void Diver_Init(void)
 {
     Gui_Init();
-    
+    lcd_Screen_Init();
     ADC_Init();
     adc_filter_prefill();
     
